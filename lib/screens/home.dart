@@ -11,6 +11,65 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  bool isShown = false;
+
+  void _showOrientationDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        ValueNotifier<double> height = ValueNotifier<double>(MediaQuery.of(context).size.height);
+
+        // Minimum height threshold
+        const minHeight = 600.0;
+
+        return ValueListenableBuilder(
+            valueListenable: height,
+            builder: (context, value, child) {
+              // Global error handling
+              FlutterError.onError = (FlutterErrorDetails details) {
+                String generatedError = details.exceptionAsString();
+                // print('Flutter Error: $generatedError');
+
+                if (generatedError.contains("A RenderFlex overflowed")) {
+                  // print("RenderFlex overflow detected! Performing necessary actions...");
+                  Navigator.of(context).pop();
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    setState(() {
+                      isShown = false;
+                    });
+                  });
+                }
+
+                // // Define your trigger error string
+                // String triggerError1 = "Attempt to write to field 'io.flutter.plugin.common.EventChannel\$EventSink com.lyokone.location.FlutterLocation.events' on a null object reference";
+                // String triggerError2 = "PlatformException(error, No active stream to cancel, null, null)";
+                // // Check if the error matches the trigger
+                // if (generatedError == triggerError1 || generatedError == triggerError2) {
+                //   // Cancel the location subscription
+                //   locationSubscription?.cancel();
+                // }
+              };
+
+              if (height.value >= minHeight && isShown == true) {
+                Navigator.of(context).pop();
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  setState(() {
+                    isShown = false;
+                  });
+                });
+              }
+
+              return AlertDialog(
+                title: Text('Orientation Warning'),
+                content: Text('Please switch to portrait mode or use a larger screen for a better experience.'),
+              );
+            }
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // Get the screen size
@@ -21,6 +80,22 @@ class _HomeState extends State<Home> {
     double iconSize = screenSize.width / 25;
     double clockSize = screenSize.width / 450;
     double dynamicIslandSize = screenSize.height / 30;
+    Orientation orientation = MediaQuery.of(context).orientation;
+    double height = MediaQuery.of(context).size.height;
+
+    // Minimum height threshold
+    const minHeight = 600.0;
+
+    // Check conditions for showing dialog
+    if (height < minHeight && isShown == false) {
+      // Show dialog only once to avoid multiple dialogs
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showOrientationDialog();
+      });
+      setState(() {
+        isShown = true;
+      });
+    }
 
     return Scaffold(
       body: Stack(
@@ -32,7 +107,20 @@ class _HomeState extends State<Home> {
             child: Image.asset("assets/images/background_wallpaper.jpg", fit: BoxFit.cover,),
           ),
           // Main content
-          Center(child: Text('Your Content Here', style: TextStyle(fontSize: 24, color: Colors.white))),
+          Center(
+              child: Card(
+                margin: EdgeInsets.all(40),
+                color: Colors.white,
+                child: Container(
+                  padding: EdgeInsets.all(20),
+                  child: Text(
+                      'Great Content is coming soon!',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 24, color: Colors.black,),
+                  ),
+                ),
+              ),
+          ),
 
 
           // Status Bar iPhone
