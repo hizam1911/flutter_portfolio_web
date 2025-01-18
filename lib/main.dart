@@ -13,13 +13,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'My Personal Web',
+      title: 'Fakhrul Hizam',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent),
         useMaterial3: true,
       ),
       routes: {
-        Home.routeName: (context) => Home(), // '/home'
+        Home.routeName: (context) => Home(), // '/'
       },
     );
   }
